@@ -8,7 +8,6 @@
     //Доставка на дом
     class HomeDelivery : Delivery
     {
-        private string AddresstoDeliver;
         private DateTime TimetoDeliver;
 
     }
@@ -16,14 +15,12 @@
     //Доставка до постамата
     class PickPointDelivery : Delivery
     {
-        private string AddressToDeliver;
         private DateTime Delivered;
     }
 
     //Доставка до розничного магазина
     class ShopDelivery : Delivery
     {
-        private string AddressToDeliver;
         private DateTime Delivered;
     }
 
@@ -31,45 +28,43 @@
     {
         public TDelivery Delivery;
 
+        public Guid Id { get; }
+
         public int Number;
 
         public string Description;
+
+        public bool IsCanceled { get; set; }
+
+        public Order()
+        {
+            Id = Guid.NewGuid();
+        }
 
         public void DisplayAddress()
         {
             Console.WriteLine(Delivery.Address);
         }
 
-
-    }
-
-    class CancelOrder
-    {
-
-    }
-
-    class Orders
-    {
-        public int Number;
-        public string Description;
     }
 
     class OrderHistory
     {
-        private Orders[] history;
 
-        public OrderHistory(Orders[] history)
+        private List<Order<Delivery>> _history;
+
+        public OrderHistory()
         {
-            this.history = history;
+            _history = new List<Order<Delivery>>();
         }
 
-        public Orders this[int index]
+        public Order<Delivery> this[int index]
         {
             get
             {
-                if (index >= 0 && index < history.Length)
+                if (index >= 0 && index < _history.Count)
                 {
-                    return history[index];
+                    return _history[index];
                 }
                 else
                 {
@@ -77,14 +72,21 @@
                 }
             }
 
-            private set
-            {
-                if (index >= 0 && index < history.Length)
-                {
-                    history[index] = value;
-                }
-            }
+        }
 
+        public void Add(Order<Delivery> order)
+        {
+            _history.Add(order);
+        }
+       
+        public void Remove(Guid orderId)
+        {
+            var order = _history.FirstOrDefault(x => x.Id == orderId);
+
+            if (order != null)
+            {
+                _history.Remove(order);
+            }
         }
     }
 
@@ -92,40 +94,40 @@
 
     abstract class Pay
     {
-        protected string CardData;
+        protected string CardNumber;
 
         protected Pay(string cardData)
         {
-            CardData = cardData;
+            CardNumber = cardData;
         }
     }
 
     //Оплата в кредит или рассрочку
-    class Credit : Pay 
+    class Credit : Pay
     {
-        private bool BankApproval;
+        private bool IsBankApproval;
 
-        private Credit(bool bankApproval, string cardData) : base(cardData)
+        private Credit(bool isbankApproval, string cardData) : base(cardData)
         {
-            BankApproval = bankApproval;
+            IsBankApproval = isbankApproval;
         }
     }
 
     //Полная предоплата
-    class PreOrder : Pay 
+    class PreOrder : Pay
     {
         private bool IsPayed;
 
         private PreOrder(string cardData, bool isPayed) : base(cardData)
         {
-            IsPayed = isPayed;   
-        } 
+            IsPayed = isPayed;
+        }
     }
 
     //Оплата при получении
-    class OnArrival : Pay 
+    class OnArrival : Pay
     {
-        private bool IsPayed; 
+        private bool IsPayed;
 
         private OnArrival(bool isPayed, string cardData) : base(cardData)
         {
@@ -134,9 +136,9 @@
 
     }
 
-
     internal class Program
     {
+
         static void Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
